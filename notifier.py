@@ -1,0 +1,61 @@
+import configparser
+import platform
+import subprocess
+import os
+
+try:
+    from plyer import notification
+except:
+    notification = None
+
+try:
+    from tkinter import messagebox, Tk
+except:
+    messagebox = None
+
+
+# Load configuration
+config = configparser.ConfigParser()
+config.read("settings.conf")
+
+PLATFORM = config["NOTIFY"].get("PLATFORM", "TERMUX").upper()
+WIN_NOTIFICATIONS = config.getint("NOTIFY", "WIN_NOTIFICATIONS")
+DIALOGBOX_NOTIFICATION = config.getint("NOTIFY", "DIALOGBOX_NOTIFICATION")
+TERMUX_NOTIFICATION = config.getint("NOTIFY", "TERMUX_NOTIFICATION")
+TERMUX_NOTIFICATION_TONE = config.getint("NOTIFY", "TERMUX_NOTIFICATION_TONE")
+TERMUX_VIBRATION = config.getint("NOTIFY", "TERMUX_VIBRATION")
+
+
+def show_termux_notification(title, message):
+    if TERMUX_NOTIFICATION:
+        subprocess.run(["termux-notification", "--title", title, "--content", message])
+
+def play_termux_tone():
+    if TERMUX_NOTIFICATION_TONE:
+        subprocess.run(["termux-media-player", "play", "/system/media/audio/alarms/Alarm_Buzzer.ogg"])
+
+def vibrate_termux_pattern():
+    if TERMUX_VIBRATION:
+        # Pattern: dot-dot-dot (_._._._)
+        for _ in range(3):
+            subprocess.run(["termux-vibrate", "-d", "100"])
+            subprocess.run(["sleep", "0.2"])
+
+def show_tkinter_message(title, message):
+    if DIALOGBOX_NOTIFICATION and messagebox:
+        root = Tk()
+        root.withdraw()
+        messagebox.showinfo(title, message)
+
+def show_windows_notification(title, message):
+    if WIN_NOTIFICATIONS and notification:
+        notification.notify(title=title, message=message, timeout=5)
+
+def notify_all(title, message):
+    if PLATFORM == "TERMUX":
+        show_termux_notification(title, message)
+        play_termux_tone()
+        vibrate_termux_pattern()
+    elif PLATFORM == "WIN":
+        show_windows_notification(title, message)
+        show_tkinter_message(title, message)
