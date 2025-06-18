@@ -32,14 +32,14 @@ def show_termux_notification(title, message):
 
 def play_termux_tone():
     if TERMUX_NOTIFICATION_TONE:
-        subprocess.run(["termux-media-player", "play", "/system/media/audio/alarms/Alarm_Buzzer.ogg"])
+        subprocess.run(["termux-media-player", "play", "tones/tone1.wav"])
 
 def vibrate_termux_pattern():
     if TERMUX_VIBRATION:
         # Pattern: dot-dot-dot (_._._._)
         for _ in range(3):
-            subprocess.run(["termux-vibrate", "-d", "100"])
-            subprocess.run(["sleep", "0.2"])
+            subprocess.run(["termux-vibrate", "-d", "1000"])
+            subprocess.run(["sleep", "2"])
 
 def show_tkinter_message(title, message):
     if DIALOGBOX_NOTIFICATION and messagebox:
