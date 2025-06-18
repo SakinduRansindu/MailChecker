@@ -7,7 +7,7 @@ import configparser
 import time
 import ssl
 
-from store import insert_email_check, get_unread_emails_today, get_last_db_record, mark_last_as_read
+from store import insert_email_check, get_unread_emails_today, get_last_db_record
 
 # Load config
 config = configparser.ConfigParser()
@@ -57,7 +57,6 @@ def check_mail_pop3():
                 if unread:
                     message_lines = [f"{s} – {sub}" for s, sub in unread]
                     notify_all("New Emails Today", "\n".join(message_lines))
-                    mark_last_as_read()
             else:
                 print("No new messages.")
         else:

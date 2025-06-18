@@ -1,3 +1,4 @@
 settings.conf
 email_logs.db
+nohup.out
 __pycache__

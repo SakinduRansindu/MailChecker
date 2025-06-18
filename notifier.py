@@ -28,16 +28,42 @@ TERMUX_VIBRATION = config.getint("NOTIFY", "TERMUX_VIBRATION")
 
 def show_termux_notification(title, message):
     if TERMUX_NOTIFICATION:
-        subprocess.run(["termux-notification", "--title", title, "--content", message])
+        subprocess.run([
+            "termux-notification", 
+            "--id", "email-receive",
+            "--title", title, 
+            "--content", message,
+            "--button1", "Mark as Read",
+            "--button1-action", "python actions.py markAsRead",
+            "--action", "python actions.py markAsRead",
+            "--channel", "termux-emailApp-info",
+            "--priority", "high",
+            "--sound",
+        ])
 
-def play_termux_tone():
-    if TERMUX_NOTIFICATION_TONE:
-        subprocess.run(["termux-media-player", "play", "tones/tone1.wav"])
+def show_termux_error_notification(msg):
+    if TERMUX_NOTIFICATION:
+        subprocess.run([
+            "termux-notification", 
+            "--title", "Error",
+            "--group", "errors",
+            "--content", msg,
+            "--button1", "OK",
+            "--button1-action", "python actions.py clearErrorNotification",
+            "--channel", "termux-emailApp-errors",
+            "--vibrate", "pattern", "1000, 2000",
+            "--priority", "max",
+            "--sound",
+        ])
+
+def clear_termux_notifications(channel):
+    if TERMUX_NOTIFICATION:
+        subprocess.run(["termux-notification", "cancel", "--channel", channel], check=True)
 
 def vibrate_termux_pattern():
     if TERMUX_VIBRATION:
         # Pattern: dot-dot-dot (_._._._)
-        for _ in range(3):
+        for _ in range(4):
             subprocess.run(["termux-vibrate", "-d", "1000"])
             subprocess.run(["sleep", "2"])
 
@@ -51,10 +77,9 @@ def show_windows_notification(title, message):
     if WIN_NOTIFICATIONS and notification:
         notification.notify(title=title, message=message, timeout=5)
 
-def notify_all(title, message):
+def notify_all(title, message, id=1):
     if PLATFORM == "TERMUX":
         show_termux_notification(title, message)
-        play_termux_tone()
         vibrate_termux_pattern()
     elif PLATFORM == "WIN":
         show_windows_notification(title, message)
