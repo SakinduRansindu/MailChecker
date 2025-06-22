@@ -65,11 +65,3 @@ def check_mail_pop3():
         pop_conn.quit()
     except Exception as e:
         notify_all("POP3 Error", str(e))
-
-# Loop indefinitely
-try:
-    while True:
-        check_mail_pop3()
-        time.sleep(CHECK_INTERVAL)
-except KeyboardInterrupt:
-    print("Stopped by user.")
