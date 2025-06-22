@@ -3,3 +3,4 @@ email_logs.db
 nohup.out
 __pycache__
 scheduler.log
+test_scheduler.log
