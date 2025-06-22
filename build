@@ -1,0 +1,6 @@
+pkg install python
+pkg install termux-api
+pkg install cronie termux-services
+sv-enable crond
+echo "you need to install termux-api from fdroid or github."
+echo "installed. restart the terminal"
