@@ -53,11 +53,12 @@ def parse_cron_tasks(config):
     return tasks
 
 def add_cronjob(cron_schedule, function_name):
-    try:
-        # Get current working directory
+    try:        # Get current working directory
         work_dir = os.path.dirname(os.path.abspath(__file__))
-          # Create the command to run
-        command = f"cd {work_dir} && python actions.py {function_name}"
+        
+        # Create the command to run with proper error handling and logging
+        log_file = os.path.join(work_dir, "scheduler.log")
+        command = f"cd '{work_dir}' && /usr/bin/python3 actions.py {function_name} >> '{log_file}' 2>&1"
         
         # Create unique identifier comment (replace spaces with underscores for safety)
         safe_schedule = cron_schedule.replace(' ', '_')
@@ -67,10 +68,11 @@ def add_cronjob(cron_schedule, function_name):
         cron_entry = f"{cron_schedule} {command} {unique_id}"
         
         print(f"Adding cron job: {cron_entry}")
-        
-        # Get current crontab
+          # Get current crontab
         result = subprocess.run(["crontab", "-l"], capture_output=True, text=True)
-        current_crontab = result.stdout if result.returncode == 0 else ""        # Check if job already exists using unique identifier
+        current_crontab = result.stdout if result.returncode == 0 else ""
+        
+        # Check if job already exists using unique identifier
         safe_schedule = cron_schedule.replace(' ', '_')
         if f"MailChecker-{function_name}-{safe_schedule}" in current_crontab:
             print(f"Cron job for {function_name} already exists. Removing old one first...")
@@ -149,6 +151,45 @@ def remove_cronjob(function_name, cron_schedule=None):
         print(f"Error removing cron job: {e}")
         return False
 
+def test_cronjob_execution(function_name):
+    """Test if a cron job would execute successfully"""
+    try:
+        work_dir = os.path.dirname(os.path.abspath(__file__))
+        log_file = os.path.join(work_dir, "test_scheduler.log")
+        
+        print(f"Testing execution of {function_name}...")
+        print(f"Working directory: {work_dir}")
+        print(f"Log file: {log_file}")
+        
+        # Test the command that would be run by cron
+        command = ["/usr/bin/python3", "actions.py", function_name]
+        
+        result = subprocess.run(
+            command,
+            cwd=work_dir,
+            capture_output=True,
+            text=True,
+            timeout=30
+        )
+        
+        print(f"Return code: {result.returncode}")
+        print(f"STDOUT: {result.stdout}")
+        if result.stderr:
+            print(f"STDERR: {result.stderr}")
+        
+        # Also write to test log
+        with open(log_file, "a") as f:
+            f.write(f"[TEST] {function_name} - Return code: {result.returncode}\n")
+            f.write(f"[TEST] STDOUT: {result.stdout}\n")
+            if result.stderr:
+                f.write(f"[TEST] STDERR: {result.stderr}\n")
+        
+        return result.returncode == 0
+        
+    except Exception as e:
+        print(f"Error testing cron job: {e}")
+        return False
+
 def list_cronjobs():
     try:
         result = subprocess.run(["crontab", "-l"], capture_output=True, text=True)
@@ -192,9 +233,9 @@ def remove_all_jobs():
     if not tasks:
         print("No tasks found to remove")
         return True
-    
     print(f"Removing {len(tasks)} cron jobs...")
-      success_count = 0
+    
+    success_count = 0
     for cron_schedule, function_name in tasks:
         if remove_cronjob(function_name, cron_schedule):
             success_count += 1
@@ -211,11 +252,13 @@ def main():
         print("  list     - List current cron jobs")
         print("  add <cron_schedule> <function> - Add single cron job")
         print("  del <function> - Remove single cron job")
+        print("  test <function> - Test if a function executes properly")
         print("")
         print("Examples:")
         print("  python scheduler.py setup")
         print("  python scheduler.py add '20 9 * * *' scheduledTask1")
         print("  python scheduler.py del scheduledTask1")
+        print("  python scheduler.py test testNotify")
         return
     
     command = sys.argv[1].lower()
@@ -233,6 +276,12 @@ def main():
     elif command == "del" and len(sys.argv) >= 3:
         function_name = sys.argv[2]
         remove_cronjob(function_name)
+    elif command == "test" and len(sys.argv) >= 3:
+        function_name = sys.argv[2]
+        if test_cronjob_execution(function_name):
+            print(f"Test passed for {function_name}")
+        else:
+            print(f"Test failed for {function_name}")
     else:
         print(f"Unknown command: {command}")
         print("Use 'python scheduler.py' to see available commands")
