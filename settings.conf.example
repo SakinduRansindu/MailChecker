@@ -14,3 +14,14 @@ DIALOGBOX_NOTIFICATION = 1
 TERMUX_NOTIFICATION = 0
 TERMUX_NOTIFICATION_TONE = 0
 TERMUX_VIBRATION = 0
+
+[SCHEDULES]
+; Format: minute hour day month weekday action functionName
+; Examples:
+; 20 9 * * * scheduledTask1    - Run at 9:20 AM daily
+; 5 23 * * * scheduledTask2    - Run at 11:05 PM daily
+; 0 12 * * 1-5 dailyEmailCheck - Run at noon on weekdays only
+; */15 * * * * quickCheck      - Run every 15 minutes
+; */5 8-17 * * * emailCheck    - Run every 5 minutes from 8 AM to 5 PM
+TASKS = 30 8 * * * notifyStatus, */1 * * * * testNotify, */5 8-17 * * * dailyEmailCheck
+ENABLED = 1
