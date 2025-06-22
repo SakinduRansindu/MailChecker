@@ -36,7 +36,6 @@ def show_termux_notification(title, message):
             "--button1", "Mark as Read",
             "--button1-action", "python actions.py markAsRead",
             "--action", "python actions.py markAsRead",
-            "--channel", "termux-emailApp-info",
             "--priority", "high",
             "--sound",
         ])
