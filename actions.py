@@ -8,7 +8,7 @@ from emailChecker import check_mail_pop3
 def markAsRead():
     try:
         mark_last_as_read()
-        clear_termux_notifications("termux-emailApp-info")
+        clear_termux_notifications("emailApp-receive")
     except subprocess.CalledProcessError as e:
         print(f"Error clearing notifications: {e}")
     except Exception as e:
@@ -16,7 +16,7 @@ def markAsRead():
 
 def clearErrorNotification():
     try:
-        clear_termux_notifications("termux-emailApp-errors")
+        clear_termux_notifications("emailApp-errors")
     except subprocess.CalledProcessError as e:
         print(f"Error clearing error notifications: {e}")
     except Exception as e:

@@ -30,12 +30,12 @@ def show_termux_notification(title, message):
     if TERMUX_NOTIFICATION:
         subprocess.run([
             "termux-notification", 
-            "--id", "email-receive",
+            "--id", "emailApp-receive",
             "--title", title, 
             "--content", message,
             "--button1", "Mark as Read",
-            "--button1-action", "python actions.py markAsRead",
-            "--action", "python actions.py markAsRead",
+            "--button1-action", "bash -l -c \"cd ~/MailChecker && python actions.py markAsRead\"",
+            "--action", "bash -l -c \"cd ~/MailChecker && python actions.py markAsRead\"",
             "--priority", "high",
             "--sound",
         ])
@@ -45,19 +45,18 @@ def show_termux_error_notification(msg):
         subprocess.run([
             "termux-notification", 
             "--title", "Error",
-            "--group", "errors",
+            "--id", "emailApp-errors"
+            "--group", "emailApp-errors-group",
             "--content", msg,
             "--button1", "OK",
-            "--button1-action", "python actions.py clearErrorNotification",
-            "--channel", "termux-emailApp-errors",
-            "--vibrate", "pattern", "1000, 2000",
+            "--button1-action", "bash -l -c \"cd ~/MailChecker && python actions.py clearErrorNotification\"",
             "--priority", "max",
             "--sound",
         ])
 
-def clear_termux_notifications(channel):
+def clear_termux_notifications(id):
     if TERMUX_NOTIFICATION:
-        subprocess.run(["termux-notification", "cancel", "--channel", channel], check=True)
+        subprocess.run(["termux-notification-remove", id], check=True)
 
 def vibrate_termux_pattern():
     if TERMUX_VIBRATION:

@@ -6,6 +6,7 @@ from notifier import notify_all
 import configparser
 import time
 import ssl
+import os
 
 from store import insert_email_check, get_unread_emails_today, get_last_db_record
 
